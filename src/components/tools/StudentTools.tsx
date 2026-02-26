@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/Button';
 import { ResultBox } from '@/components/ui/ResultBox';
 import { generateText } from '@/services/ai';
 import { classOptions } from '@/data/tools';
-import { GrammarToolWrapper } from './GrammarTool';
-import { MathToolWrapper } from './MathTool';
 import { checkAndUpdateAdCounter, openAdInNewTab } from '@/services/adService';
+import { GrammarTool } from './GrammarTool';
+import { MathSolver } from './MathTool';
 
 // Helper function to handle ad before generation
 async function handleAdBeforeGeneration() {
@@ -808,9 +808,9 @@ export function StudentToolWrapper({ toolId }: StudentToolProps) {
     case 'ai-humanizer':
       return <AIHumanizer />;
     case 'easy-grammar':
-      return <GrammarToolWrapper toolId={toolId} />;
+      return <GrammarTool />;
     case 'ai-math-solver':
-      return <MathToolWrapper toolId={toolId} />;
+      return <MathSolver />;
     default:
       return <div className="text-slate-400">Tool not found</div>;
   }
