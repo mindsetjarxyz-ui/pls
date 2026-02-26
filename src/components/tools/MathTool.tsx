@@ -1,128 +1,149 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { ResultBox } from '@/components/ui/ResultBox';
-import { solveMathProblem } from '@/services/mathService';
-import { Loader } from 'lucide-react';
+import { generateText } from '@/services/ai';
+import { handleAdBeforeGeneration } from '@/services/adService';
 
-interface MathToolProps {
-  toolId: string;
-}
-
-export function MathTool({ toolId }: MathToolProps) {
-  const [input, setInput] = useState('');
+export function MathSolver() {
+  const [problem, setProblem] = useState('');
+  const [difficulty, setDifficulty] = useState('general');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSolve = async () => {
-    if (!input.trim()) {
-      alert('Please type your math problem or question');
+    await handleAdBeforeGeneration();
+    if (!problem.trim()) {
+      setError('Please enter a math problem');
       return;
     }
 
     setLoading(true);
+    setError('');
     setResult('');
-    
-    try {
-      const response = await solveMathProblem(input.trim());
-      if (response.success) {
-        setResult(response.result);
-      } else {
-        setResult(`Error: ${response.error}`);
-      }
-    } catch (err) {
-      setResult(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setLoading(false);
+
+    const prompt = `You are a math tutor. Solve this math problem step by step.
+
+Problem: ${problem}
+
+Please provide:
+
+1. SOLUTION STEPS
+   - Break down the problem clearly
+   - Show each step separately
+   - Explain why each step matters
+
+2. FINAL ANSWER
+   - Clear answer highlighted
+   - Double-check your work
+
+3. KEY CONCEPTS
+   - What math concepts are used?
+   - Why does this method work?
+
+4. SIMILAR PROBLEMS
+   - How to approach similar questions
+   - Common mistakes to avoid
+
+Format with clear spacing between sections. Use simple, tutorial language.`;
+
+    const response = await generateText(prompt);
+
+    setLoading(false);
+
+    if (response.error) {
+      setError(response.error);
+    } else {
+      setResult(formatOutput(response.output));
     }
   };
 
+  const formatOutput = (text: string): string => {
+    return text;
+  };
+
   const handleClear = () => {
-    setInput('');
+    setProblem('');
     setResult('');
+    setError('');
   };
 
   return (
-    <div className="w-full space-y-4 sm:space-y-6 px-0">
-      {/* Input Section */}
-      <div className="w-full bg-slate-800/30 border border-slate-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6">
-        <div className="w-full space-y-3 sm:space-y-4">
-          <div className="w-full">
-            <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-2">
-              Math Solver - Tell AI What You Need
-            </label>
-            <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-              Ask any math question, solve problems, explain concepts. Type in English or Bangla for Bangla solutions.
-            </p>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Example: Solve 2x + 5 = 15 or Explain Pythagorean theorem or Find derivative of x²..."
-              rows={4}
-              className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base resize-vertical"
-              style={{ minHeight: '100px' }}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-4 md:p-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2">
+            Math Solver
+          </h1>
+          <p className="text-slate-400 text-sm sm:text-base">
+            Get step-by-step solutions with explanations like a real math tutor
+          </p>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+          {/* Input Section */}
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-2xl p-5 sm:p-6 md:p-7">
+              <label className="text-sm sm:text-base font-semibold text-white mb-3 block">
+                Math Problem
+              </label>
+              <textarea
+                value={problem}
+                onChange={(e) => setProblem(e.target.value)}
+                placeholder="Enter your math problem... (e.g., 'Solve 2x + 5 = 13' or 'What is 25% of 200?')"
+                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
+                rows={6}
+              />
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-2xl p-5 sm:p-6">
+              <label className="text-sm sm:text-base font-semibold text-white mb-3 block">
+                Difficulty Level
+              </label>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full px-4 py-2 sm:py-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="basic">Basic (Elementary)</option>
+                <option value="general">General (Middle/High School)</option>
+                <option value="advanced">Advanced (College/University)</option>
+              </select>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSolve}
+                loading={loading}
+                className="flex-1 text-base sm:text-lg py-3 sm:py-4"
+              >
+                Solve Step by Step
+              </Button>
+              <Button
+                onClick={handleClear}
+                variant="secondary"
+                className="flex-1 text-base sm:text-lg py-3 sm:py-4"
+              >
+                Clear
+              </Button>
+            </div>
           </div>
 
-          <div className="w-full flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <Button
-              onClick={handleSolve}
-              disabled={loading || !input.trim()}
-              className="w-full sm:flex-1 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-pink-600"
-            >
-              {loading ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin mr-2" />
-                  Solving...
-                </>
-              ) : (
-                'Get Answer'
-              )}
-            </Button>
-            <Button
-              onClick={handleClear}
-              disabled={loading}
-              className="w-full sm:flex-1 py-2.5 sm:py-3 text-sm sm:text-base bg-slate-700/50 hover:bg-slate-600/50 text-slate-300"
-            >
-              Clear
-            </Button>
+          {/* Result Section */}
+          <div className="h-full min-h-[500px] sm:min-h-[600px]">
+            <ResultBox content={result} isLoading={loading} />
           </div>
         </div>
       </div>
-
-      {/* Result Section */}
-      {result && (
-        <div className="w-full bg-slate-800/30 border border-slate-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6">
-          <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-3 sm:mb-4">Solution</h3>
-          <div className="overflow-x-auto">
-            <ResultBox content={result} />
-          </div>
-        </div>
-      )}
-
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <Loader className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-            <p className="text-sm sm:text-base text-slate-400">Working on your problem...</p>
-          </div>
-        </div>
-      )}
-
-      {!result && !loading && (
-        <div className="w-full bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 sm:p-4">
-          <p className="text-xs sm:text-sm text-blue-200 leading-relaxed">
-            <span className="text-xs text-slate-400">💡 How to use: </span>
-            Just tell the AI what you need! Ask to solve, explain, derive, simplify, or anything math-related. Type in English for English solutions, Bangla for Bangla solutions.
-          </p>
-          <p className="text-xs text-slate-500 mt-2">
-            ℹ️ Note: Generation may cause ad to display occasionally
-          </p>
-        </div>
-      )}
     </div>
   );
-}
-
-export function MathToolWrapper({ toolId }: MathToolProps) {
-  return <MathTool toolId={toolId} />;
 }
