@@ -93,3 +93,20 @@ export function resetAdCounter(): void {
     console.error("Error resetting ad counter:", error);
   }
 }
+
+// Handle ad before generation - checks if ad should show and opens it
+export async function handleAdBeforeGeneration(): Promise<void> {
+  try {
+    const { shouldShowAd, adUrl } = checkAndUpdateAdCounter();
+    
+    if (shouldShowAd && adUrl) {
+      // Open ad in new tab
+      openAdInNewTab(adUrl);
+      
+      // Optional: Small delay to ensure user sees the generation after ad
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  } catch (error) {
+    console.error("Error handling ad before generation:", error);
+  }
+}
