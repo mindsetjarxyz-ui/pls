@@ -308,11 +308,6 @@ Generate a polished, professional letter ready for business use.`;
     </div>
   );
 }
-      </div>
-      <ResultBox content={result} isLoading={loading} />
-    </div>
-  );
-}
 
 // ==================== DEBATE WRITER ====================
 export function DebateWriter() {
