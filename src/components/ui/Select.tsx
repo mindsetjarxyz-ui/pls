@@ -1,12 +1,26 @@
+import React from 'react';
 import { cn } from '@/utils/cn';
-import { ChevronDown } from 'lucide-react';
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
-  options: { value: string; label: string }[];
+  options: SelectOption[];
+  error?: string;
+  placeholder?: string;
 }
 
-export function Select({ label, options, className, ...props }: SelectProps) {
+export function Select({
+  label,
+  options,
+  error,
+  placeholder = 'Select...',
+  className = '',
+  ...props
+}: SelectProps) {
   return (
     <div className="w-full">
       {label && (
@@ -14,22 +28,22 @@ export function Select({ label, options, className, ...props }: SelectProps) {
           {label}
         </label>
       )}
-      <div className="relative">
-        <select
-          className={cn(
-            'w-full px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer text-sm sm:text-base pr-10',
-            className
-          )}
-          {...props}
-        >
-          {options.map(opt => (
-            <option key={opt.value} value={opt.value} className="bg-slate-800">
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-      </div>
+      <select
+        className={cn(
+          'w-full px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base transition-colors appearance-none cursor-pointer',
+          error && 'border-red-500 focus:ring-red-500',
+          className
+        )}
+        {...props}
+      >
+        <option value="">{placeholder}</option>
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      {error && <p className="text-red-400 text-xs sm:text-sm mt-1">{error}</p>}
     </div>
   );
 }

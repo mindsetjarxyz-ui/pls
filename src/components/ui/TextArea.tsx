@@ -1,10 +1,18 @@
+import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
+  error?: string;
 }
 
-export function TextArea({ label, className, ...props }: TextAreaProps) {
+export function TextArea({
+  label,
+  error,
+  className = '',
+  rows = 4,
+  ...props
+}: TextAreaProps) {
   return (
     <div className="w-full">
       {label && (
@@ -13,12 +21,15 @@ export function TextArea({ label, className, ...props }: TextAreaProps) {
         </label>
       )}
       <textarea
+        rows={rows}
         className={cn(
-          'w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-all duration-200 text-sm sm:text-base min-h-[100px] sm:min-h-[120px] md:min-h-[150px]',
+          'w-full px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base transition-colors',
+          error && 'border-red-500 focus:ring-red-500',
           className
         )}
         {...props}
       />
+      {error && <p className="text-red-400 text-xs sm:text-sm mt-1">{error}</p>}
     </div>
   );
 }
